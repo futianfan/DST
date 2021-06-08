@@ -182,31 +182,35 @@ python src/data_cleaning.py
 
 ### 3.1 train GNN
 
-
 - input 
   - `data/zinc_QED_clean.txt`: **training data** includes `(X,y)` pairs, where `X` is the molecule, `y` is the label. `y = GNN(X)`
 
 - output 
-  - `save_model/model_epoch_*.ckpt`: saved model. 
+  - `save_model/model_epoch_*.ckpt`: saved GNN model. 
 
 - log
-  - `figure/` Changes of loss on validation set as a function of iterations. 
-
+  - `"valid_loss_folder/" + prop + ".pkl"` save the valid loss. 
 
 ```bash 
-python src/train_gnn.py | tee log/train_gnn.log 
+python src/train_{$prop}.py 
 ```
+`prop` is `qed`, `logp`, `jnk`, `gsk`, `jnkgsk`, ... 
+for logp, GNN minimizes MSE, for other tasks, it minimizes binary cross entropy. 
 
 
 
-### 3.2 de novo 
+### 3.2 de novo generation 
 
 ```bash
-
+python src/denovo_{$prop}.py 
 ```
+
 - input 
+  - `save_model/model_epoch_*.ckpt`: saved GNN model. 
 
 - output 
+  - `result/denovo_{$prop}.pkl`: generated moles. 
+
 
 
 ### 3.3 evaluate 
@@ -215,8 +219,45 @@ python src/train_gnn.py | tee log/train_gnn.log
 
 ```
 - input 
+  - `result/denovo_{$prop}.pkl`: generated moles. 
 
 - output 
+
+
+
+
+
+## code interpretation 
+
+
+### build DST 
+
+
+
+### optimize DST 
+
+
+
+### sampling from DST 
+
+
+
+### DPP 
+
+
+
+
+### utility 
+
+
+
+
+
+
+
+
+
+
 
 
 
