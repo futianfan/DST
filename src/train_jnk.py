@@ -41,7 +41,7 @@ prop = 'JNK3'
 device = 'cpu'
 
 ## 2.2 data 
-data_file = "data/zinc_" + prop + "_clean.txt"
+data_file = "data/zinc_" + prop + "_clean_10k.txt"
 with open(data_file, 'r') as fin:
 	lines = fin.readlines() 
 lines = [(line.split()[0], float(line.split()[1])) for line in lines]
@@ -107,12 +107,6 @@ for ep in range(epoch):
 		
 		cost, pred = gnn.learn(node_mat, adjacency_matrix, weight, y)
 		cost_lst.append(cost)
-		# print('train cost', cost, 'pred', pred)
-
-		# if i % every_k_iters == 0 and i > 0:
-		# 	plt.cla()
-		# 	plt.plot(cost_lst)
-		# 	plt.savefig("figure/" + "learning_curve_train_loss_" + prop + ".png")			
 
 		#### 2. validation 
 		# if i % every_k_iters == 0 and i > 0:
@@ -141,9 +135,6 @@ for ep in range(epoch):
 			valid_loss_lst.append(valid_loss)
 			file_name = valid_loss_folder + ".pkl"
 			pickle.dump(valid_loss_lst, open(file_name, 'wb'))
-			plt.cla()
-			plt.plot(valid_loss_lst)
-			plt.savefig("figure/" + "learning_curve_validloss_" + prop + ".png")
 			file_name = save_folder + str(ep) + "_iter_" + str(i) + "_validloss_" + str(valid_loss)[:6] + ".ckpt"
 			torch.save(gnn, file_name)
 			gnn.train()

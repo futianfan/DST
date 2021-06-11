@@ -147,7 +147,11 @@ python src/data_cleaning.py
 
 
 
+### 2.7 limit oracle setting 
 
+```
+head -10000 data/zinc_QED_clean.txt > data/zinc_QED_clean_10K.txt
+```
 
 
 
@@ -183,7 +187,7 @@ python src/data_cleaning.py
 ### 3.1 train GNN
 
 - input 
-  - `data/zinc_QED_clean.txt`: **training data** includes `(X,y)` pairs, where `X` is the molecule, `y` is the label. `y = GNN(X)`
+  - `data/zinc_QED_clean.txt`: **training data** includes `(SMILES,y)` pairs, where `SMILES` is the molecule, `y` is the label. `y = GNN(SMILES)`
 
 - output 
   - `save_model/model_epoch_*.ckpt`: saved GNN model. 
@@ -194,8 +198,9 @@ python src/data_cleaning.py
 ```bash 
 python src/train_{$prop}.py 
 ```
-`prop` is `qed`, `logp`, `jnk`, `gsk`, `jnkgsk`, ... 
-for logp, GNN minimizes MSE, for other tasks, it minimizes binary cross entropy. 
+
+`prop` is `qed`, `logp`, `jnk`, `gsk`, `jnkgsk`, `qedsajnkgsk`.  
+For logp, GNN minimizes MSE; for other tasks, it minimizes binary cross entropy. 
 
 
 
@@ -209,19 +214,18 @@ python src/denovo_{$prop}.py
   - `save_model/model_epoch_*.ckpt`: saved GNN model. 
 
 - output 
-  - `result/denovo_{$prop}.pkl`: generated moles. 
+  - `result/denovo_{$prop}.pkl`: generated molecules in various iterations. 
 
 
 
 ### 3.3 evaluate 
 
 ```bash
-
+python src/evaluate_denovo_{$prop}.py 
 ```
-- input 
-  - `result/denovo_{$prop}.pkl`: generated moles. 
 
-- output 
+- input 
+  - `result/denovo_{$prop}.pkl`
 
 
 
@@ -230,24 +234,31 @@ python src/denovo_{$prop}.py
 ## code interpretation 
 
 
+### GNN 
+`module.py`: GCN 
+
+
+
 ### build DST 
 
+`chemutils.smiles2differentiable_graph_v2`: convert smiles to DST 
 
 
 ### optimize DST 
 
+`module.py`: 
 
+```python
+class GCN(nn.Module):
+
+    def update_molecule(self, ...):
+
+```
 
 ### sampling from DST 
 
+`chemutils.differentiable_graph2smiles_sample_v2` 
 
-
-### DPP 
-
-
-
-
-### utility 
 
 
 

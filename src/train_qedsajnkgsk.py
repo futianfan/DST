@@ -26,8 +26,6 @@ from module import GCN
 from chemutils import smiles2graph, vocabulary 
 from utils import Molecule_Dataset 
 
-
-# ['JNK3', 'GSK3B', 'DRD2']
 prop = 'qedsajnkgsk'
 
 
@@ -39,7 +37,7 @@ prop = 'qedsajnkgsk'
 device = 'cpu'
 
 ## 2.2 data 
-data_file = "data/" + prop + ".txt"
+data_file = "data/" + prop + "_20k.txt"
 with open(data_file, 'r') as fin:
 	lines = fin.readlines() 
 lines = [(line.split()[0], float(line.split()[1])) for line in lines]
@@ -69,28 +67,10 @@ print('data loader is built!')
 
 
 
-
-
-
-
-
 ## 4. model 
 gnn = GCN(nfeat = 50, nhid = 100, n_out = 1, num_layer = 3).to(device)
 print('GNN is built!')
 
-
-
-
-## 5. learn 
-'''
-	chemutils.smiles2differentiable_graph 
-	chemutils.smiles2graph 
-
-	&&  
-
-	module.GCN.forward 
-
-'''
 
 cost_lst = []
 valid_loss_lst = []
@@ -112,7 +92,6 @@ for ep in tqdm(range(epoch)):
 		cost_lst.append(cost)
 
 		#### 2. validation 
-		# if i % every_k_iters == 0 and i > 0:
 		if i % every_k_iters == 0:
 			gnn.eval()
 			valid_loss, valid_num = 0,0 
@@ -129,9 +108,6 @@ for ep in tqdm(range(epoch)):
 				valid_num += 1 
 			valid_loss = valid_loss / valid_num
 			valid_loss_lst.append(valid_loss)
-			# plt.cla()
-			# plt.plot(valid_loss_lst)
-			# plt.savefig("figure/" + prop + "_valid_loss.png")
 			file_name = save_folder + str(ep) + "_iter_" + str(i) + "_validloss_" + str(valid_loss)[:7] + ".ckpt"
 			torch.save(gnn, file_name)
 			gnn.train()
