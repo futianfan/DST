@@ -656,17 +656,9 @@ def add_fragment_at_position(editmol, position_idx, fragment, new_bond):
         for i,v in enumerate(atom_lst):
             v_idx = v.GetIdx()
             ### v1 is neighbor of v 
-            for v1 in atom_lst:
+            for v1 in [atom_lst[i-1], atom_lst[i+1-len(atom_lst)]]: 
                 v1_idx = v1.GetIdx()
-                if v1_idx == v_idx:
-                    continue 
-                bond = fragment_mol.GetBondBetweenAtoms(v_idx, v1_idx) 
-                if bond is None:
-                    continue
-                bondtype_frag = bond.GetBondType()
-            # for v1 in [atom_lst[i-1], atom_lst[i+1-len(atom_lst)]]: 
-            #     v1_idx = v1.GetIdx()
-            #     bondtype_frag = fragment_mol.GetBondBetweenAtoms(v_idx, v1_idx).GetBondType()
+                bondtype_frag = fragment_mol.GetBondBetweenAtoms(v_idx, v1_idx).GetBondType()
                 # print("current:", current_atom_symbol, "neighbor:", neighbor_atom_symbol, bondtype_edit)
                 # print(v.GetSymbol(), v1.GetSymbol(), bondtype_frag)
                 if v.GetSymbol()==current_atom_symbol and v1.GetSymbol()==neighbor_atom_symbol and bondtype_edit==bondtype_frag: 
@@ -708,8 +700,8 @@ def add_fragment_at_position(editmol, position_idx, fragment, new_bond):
                     if new_smiles is not None:
                         assert '.' not in new_smiles
                         new_smiles_set.add(new_smiles)
-                    # print(new_smiles)
-    # print(new_smiles_set)
+                    print(new_smiles)
+    print(new_smiles_set)
     return new_smiles_set
 
 
