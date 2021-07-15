@@ -103,7 +103,7 @@ def optimize_single_molecule_one_iterate(smiles, gnn):
 def optimize_single_molecule_one_iterate_v2(smiles, gnn):
 	if not is_valid(smiles):
 		return set()
-	(is_nonleaf, is_leaf, is_extend), node_indicator, adjacency_mask, adjacency_weight, leaf_extend_idx_pair, leaf_nonleaf_lst = smiles2differentiable_graph_v2(smiles)
+	(is_nonleaf, is_leaf, is_extend), node_indicator, adjacency_mask, adjacency_weight, leaf_extend_idx_pair, leaf_nonleaf_lst = smiles2differentiable_graph_v3(smiles)
 	differentiable_graph = gnn.update_molecule_v2((is_nonleaf, is_leaf, is_extend), node_indicator, adjacency_mask, adjacency_weight, leaf_extend_idx_pair, leaf_nonleaf_lst)
 	smiles_set = differentiable_graph2smiles(origin_smiles = smiles, differentiable_graph = differentiable_graph, 
 											 leaf_extend_idx_pair = leaf_extend_idx_pair, leaf_nonleaf_lst = leaf_nonleaf_lst)
