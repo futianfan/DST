@@ -8,7 +8,6 @@ This repository hosts [DST (Differentiable Scaffolding Tree for Molecule Optimiz
 - Installation 
 - Data and Setup
 - Learning and Inference 
-<!-- - Example -->
 - Contact 
 
 
@@ -36,7 +35,7 @@ conda activate differentiable_molecular_graph
 ## 2. Data and Setup
 
 
-### 2.1 Raw Data 
+### Raw Data 
 
 We use [`ZINC`](https://tdcommons.ai/generation_tasks/molgen/) database, which contains around 250K drug-like molecules. 
 input is `raw_data/zinc.tab`, each row is a SMILES. 
@@ -60,12 +59,12 @@ For JNK3, GSK3B, QED and (normalized) SA, higher is better.
 ### Optimization Task 
 
 There are two kinds of optimization tasks: single-objective and multi-objective optimization. 
-multi-objective optimization contains `jnkgsk`, `qedsajnkgsk`. 
+Multi-objective optimization contains `jnkgsk` (JNK3 + GSK3B), `qedsajnkgsk` (QED + SA + JNK3 + GSK3B). 
 
 
-### Labeling
+### Labelling
 
-We use oracle to evaluate molecule's properties to obtain the labels for molecules. 
+We use oracle to evaluate molecule's properties to obtain the labels for training graph neural network. 
 
 - input
   - `raw_data/zinc.tab`: all the smiles in ZINC, around 250K. 
@@ -78,7 +77,8 @@ python src/data_zinc.py
 ```
 
 ### Generate Vocabulary 
-In this project, the basic unit is substructure, which contains frequent atoms and rings. The vocabulary is the set of all these atoms and rings. 
+In this project, the basic unit is substructure, which contains frequent atoms and rings. 
+The vocabulary is the set of all these atoms and rings. 
 
 - substructure
   - basic unit in molecule tree, including single rings and atoms. 
@@ -97,24 +97,19 @@ python src/data_generate_vocabulary.py
 
 ### 2.6 data cleaning  
 
-We want to remove the molecules that contains substructure that is not in vocabulary 
-
+We remove the molecules that contains substructure that is not in vocabulary. 
 
 - input 
   - `data/selected_vocabulary.txt`: vocabulary 
   - `raw_data/zinc.tab`: all the smiles in ZINC
   - `data/zinc_QED.txt` 
 
-
 - output
   - `data/zinc_QED_clean.txt`
-
 
 ```bash 
 python src/data_cleaning.py 
 ```
-
-
 
 ### 2.7 limit oracle setting 
 
@@ -133,20 +128,18 @@ head -10000 data/zinc_QED_clean.txt > data/zinc_QED_clean_10K.txt
 
 It corresponds to Section 3.2 in the paper. 
 
-- input 
-  - `data/zinc_QED_clean.txt`: **training data** includes `(SMILES,y)` pairs, where `SMILES` is the molecule, `y` is the label. `y = GNN(SMILES)`
-
-- output 
-  - `save_model/model_epoch_*.ckpt`: saved GNN model. 
-
-- log
-  - `"valid_loss_folder/" + prop + ".pkl"` save the valid loss. 
-
 ```bash 
-python src/train_{$prop}.py 
+python src/train_{$prop}.py 5000
 ```
 
-`prop` represent the property to optimize, including `qed`, `logp`, `jnk`, `gsk`, `jnkgsk`, `qedsajnkgsk`.  
+- `5000` is number of oracle calls in experiments. 
+- `prop` represent the property to optimize, including `qed`, `logp`, `jnk`, `gsk`, `jnkgsk`, `qedsajnkgsk`.  
+- input 
+  - `data/zinc_QED_clean.txt`: **training data** includes `(SMILES,y)` pairs, where `SMILES` is the molecule, `y` is the label. `y = GNN(SMILES)`
+- output 
+  - `save_model/model_epoch_*.ckpt`: saved GNN model. 
+- log
+  - `"valid_loss_folder/" + prop + ".pkl"` save the valid loss. 
 
 
 
@@ -157,7 +150,7 @@ It corresponds to Section 3.3 and 3.4 in the paper.
 ```bash
 python src/denovo_{$prop}.py 5000
 ```
-`5000` is number of oracle calls in experiments. 
+- `5000` is number of oracle calls. 
 
 - input 
   - `save_model/{$prop}_*.ckpt`: saved GNN model. * is number of iteration or epochs. 
