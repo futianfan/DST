@@ -1,66 +1,29 @@
-# DST (differentiable scaffolding tree)
+# DST: Differentiable Scaffolding Tree for Molecule Optimization 
 
 
 
+## 1. Installation 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## 1. setup
-
-please see `conda.yml`
-
+To install locally, we recommend to install from `pip` and `conda`. Please see `conda.yml` for the package dependency. 
+ 
 ```bash
-conda activate tdc
-source activate differentiable_molecular_graph
+conda create -n dst python=3.7 
+pip install tqdm 
+pip install torch 
+pip install PyTDC 
+conda install -c rdkit rdkit 
+```
+
+
+The following command activate conda environment. 
+```bash
+conda activate dst
+conda activate differentiable_molecular_graph
 ```
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## 2. data preparation
+## 2. Data
 
 
 ### Raw Data 
@@ -258,6 +221,29 @@ class GCN(nn.Module):
 ### sampling from DST 
 
 `chemutils.differentiable_graph2smiles_sample_v2` 
+
+
+
+## Example 
+
+
+
+
+## Contact 
+Please contact futianfan@gmail.com or gaowh19@gmail.com for help or submit an issue. 
+
+
+## Cite Us
+If you found this package useful, please cite [our paper](https://openreview.net/forum?id=w_drCosT76&referrer=%5BAuthor%20Console%5D(%2Fgroup%3Fid%3DICLR.cc%2F2022%2FConference%2FAuthors%23your-submissions)):
+```
+@article{huang2020deeppurpose,
+  title={Differentiable Scaffolding Tree for Molecule Optimization},
+  author={Tianfan Fu, Wenhao Gao, Cao Xiao, Jacob Yasonik, Connor W. Coley, Jimeng Sun},
+  journal={International Conference on Learning Representation (ICLR)},
+  year={2022}
+}
+```
+
 
 
 
