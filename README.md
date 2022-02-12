@@ -1,17 +1,16 @@
 # DST: Differentiable Scaffolding Tree for Molecule Optimization 
 
 
-This repository hosts HINT, a deep learning based method for clinical trial outcome prediction. 
-The repository can be mainly divided into three parts:
+This repository hosts [DST (Differentiable Scaffolding Tree for Molecule Optimization)](https://openreview.net/forum?id=w_drCosT76&referrer=%5BAuthor%20Console%5D(%2Fgroup%3Fid%3DICLR.cc%2F2022%2FConference%2FAuthors%23your-submissions)), a deep learning based method for de novo molecule optimization. 
 
 
 
 ## Table Of Contents
 
-- 1. Installation 
-- 2. Data
-- 3. Learning and Inference 
-- 4. Example
+- Installation 
+- Data and Setup
+- Learning and Inference 
+- Example
 - Contact 
 
 
@@ -36,10 +35,10 @@ conda activate differentiable_molecular_graph
 
 
 
-## 2. Data
+## 2. Data and Setup
 
 
-### Raw Data 
+### 2.1 Raw Data 
 
 We use [`ZINC`](https://tdcommons.ai/generation_tasks/molgen/) database, which contains around 250K drug-like molecules. 
 input is `raw_data/zinc.tab`, each row is a SMILES. 
@@ -49,17 +48,17 @@ input is `raw_data/zinc.tab`, each row is a SMILES.
 
 ### Oracle
 
-Molecular property is evaluated by oracle. 
-
-* `JNK3`
+Oracle is a property evaluator and is a function whose input is molecular structure, and output is the ground truth value of the property. 
+We consider following oracles: 
+* `JNK3` 
 * `GSK3B` 
-* `LogP` 
-* `QED` 
+* `QED`: Quantitative Estimate of Drug-likeness. It ranges from 0 to 1. 
 * `SA` normalized SA to (0,1): see `sa.py`
+* `LogP`: solubility and synthetic accessibility of a compound. It ranges from negative infinity to positive infinity.  
 
 
 
-### Task 
+### Optimization Task 
 
 * `jnkgsk`
 * `qedsajnkgsk`
