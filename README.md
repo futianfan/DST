@@ -1,6 +1,20 @@
 # DST: Differentiable Scaffolding Tree for Molecule Optimization 
 
 
+This repository hosts HINT, a deep learning based method for clinical trial outcome prediction. 
+The repository can be mainly divided into three parts:
+
+
+
+## Table Of Contents
+
+- 1. Installation 
+- 2. Data
+- 3. Learning and Inference 
+- 4. Example
+- Contact 
+
+
 
 ## 1. Installation 
 
@@ -8,7 +22,6 @@ To install locally, we recommend to install from `pip` and `conda`. Please see `
  
 ```bash
 conda create -n dst python=3.7 
-pip install tqdm 
 pip install torch 
 pip install PyTDC 
 conda install -c rdkit rdkit 
@@ -28,7 +41,7 @@ conda activate differentiable_molecular_graph
 
 ### Raw Data 
 
-We use `ZINC` database, which contains around 250K drug-like molecules. 
+We use [`ZINC`](https://tdcommons.ai/generation_tasks/molgen/) database, which contains around 250K drug-like molecules. 
 input is `raw_data/zinc.tab`, each row is a SMILES. 
 `raw_data/zinc.tab_head50` is an example file that has first 50 rows. 
 
@@ -145,7 +158,8 @@ head -10000 data/zinc_QED_clean.txt > data/zinc_QED_clean_10K.txt
 
 
 
-## 3. pipeline 
+## 3. Learning and Inference 
+ 
 
 ### 3.1 train GNN
 
