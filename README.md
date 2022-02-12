@@ -1,8 +1,6 @@
 # DST: Differentiable Scaffolding Tree for Molecule Optimization 
 
-
-This repository hosts [DST (Differentiable Scaffolding Tree for Molecule Optimization)](https://openreview.net/forum?id=w_drCosT76&referrer=%5BAuthor%20Console%5D(%2Fgroup%3Fid%3DICLR.cc%2F2022%2FConference%2FAuthors%23your-submissions)), a deep learning based method for de novo molecule optimization. 
-
+This repository hosts [DST (Differentiable Scaffolding Tree for Molecule Optimization)](https://openreview.net/forum?id=w_drCosT76&referrer=%5BAuthor%20Console%5D(%2Fgroup%3Fid%3DICLR.cc%2F2022%2FConference%2FAuthors%23your-submissions)), which enables a gradient-based optimization on a chemical graph. 
 
 
 ## Table Of Contents
@@ -10,7 +8,7 @@ This repository hosts [DST (Differentiable Scaffolding Tree for Molecule Optimiz
 - Installation 
 - Data and Setup
 - Learning and Inference 
-- Example
+<!-- - Example -->
 - Contact 
 
 
@@ -50,23 +48,19 @@ input is `raw_data/zinc.tab`, each row is a SMILES.
 
 Oracle is a property evaluator and is a function whose input is molecular structure, and output is the ground truth value of the property. 
 We consider following oracles: 
-* `JNK3` 
-* `GSK3B` 
-* `QED`: Quantitative Estimate of Drug-likeness. It ranges from 0 to 1. 
-* `SA` normalized SA to (0,1): see `sa.py`
-* `LogP`: solubility and synthetic accessibility of a compound. It ranges from negative infinity to positive infinity.  
+* `JNK3`: biological activity to JNK3, ranging from 0 to 1.
+* `GSK3B` biological activity to GSK3B, ranging from 0 to 1. 
+* `QED`: Quantitative Estimate of Drug-likeness, ranging from 0 to 1. 
+* `SA`: Synthetic Accessibility, we normalize SA to (0,1). 
+* `LogP`: solubility and synthetic accessibility of a compound. It ranges from negative infinity to positive infinity. 
 
+For JNK3, GSK3B, QED and (normalized) SA, higher is better. 
 
 
 ### Optimization Task 
 
-* `jnkgsk`
-* `qedsajnkgsk`
-* `qed`
-* `logp`
-* `jnk`
-* `gsk`
-
+There are two kinds of optimization tasks: single-objective and multi-objective optimization. 
+multi-objective optimization contains `jnkgsk`, `qedsajnkgsk`. 
 
 
 ### Labeling
@@ -87,7 +81,7 @@ python src/data_zinc.py
 In this project, the basic unit is substructure, which contains frequent atoms and rings. The vocabulary is the set of all these atoms and rings. 
 
 - substructure
-  - basic unit in molecule tree, including rings and atoms. 
+  - basic unit in molecule tree, including single rings and atoms. 
 
 - input
   - `raw_data/zinc.tab`: all the smiles in ZINC, around 250K. 
@@ -132,35 +126,12 @@ head -10000 data/zinc_QED_clean.txt > data/zinc_QED_clean_10K.txt
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ## 3. Learning and Inference 
  
 
-### 3.1 train GNN
+### 3.1 train graph neural network (GNN)
+
+It corresponds to Section 3.2 in the paper. 
 
 - input 
   - `data/zinc_QED_clean.txt`: **training data** includes `(SMILES,y)` pairs, where `SMILES` is the molecule, `y` is the label. `y = GNN(SMILES)`
@@ -175,69 +146,39 @@ head -10000 data/zinc_QED_clean.txt > data/zinc_QED_clean_10K.txt
 python src/train_{$prop}.py 
 ```
 
-`prop` is `qed`, `logp`, `jnk`, `gsk`, `jnkgsk`, `qedsajnkgsk`.  
-For logp, GNN minimizes MSE; for other tasks, it minimizes binary cross entropy. 
+`prop` represent the property to optimize, including `qed`, `logp`, `jnk`, `gsk`, `jnkgsk`, `qedsajnkgsk`.  
 
 
 
-### 3.2 de novo generation 
+### 3.2 de novo molecule design 
+
+It corresponds to Section 3.3 and 3.4 in the paper.  
 
 ```bash
-python src/denovo_{$prop}.py 
+python src/denovo_{$prop}.py 5000
 ```
+`5000` is number of oracle calls in experiments. 
 
 - input 
-  - `save_model/model_epoch_*.ckpt`: saved GNN model. 
+  - `save_model/{$prop}_*.ckpt`: saved GNN model. * is number of iteration or epochs. 
 
 - output 
-  - `result/denovo_{$prop}.pkl`: generated molecules in various iterations. 
-
+  - `result/{$prop}.pkl`: set of generated molecules. 
 
 
 ### 3.3 evaluate 
 
 ```bash
-python src/evaluate_denovo_{$prop}.py 
+python src/evaluate_{$prop}.py 
 ```
 
 - input 
-  - `result/denovo_{$prop}.pkl`
+  - `result/{$prop}.pkl`
+- output 
+  - `diversity`, `novelty`, `average property` of top-100 molecules with highest property. 
 
 
-
-
-
-## code interpretation 
-
-
-### GNN 
-`module.py`: GCN 
-
-
-
-### build DST 
-
-`chemutils.smiles2differentiable_graph_v2`: convert smiles to DST 
-
-
-### optimize DST 
-
-`module.py`: 
-
-```python
-class GCN(nn.Module):
-
-    def update_molecule(self, ...):
-
-```
-
-### sampling from DST 
-
-`chemutils.differentiable_graph2smiles_sample_v2` 
-
-
-
-## Example 
+<!-- ## Example  -->
 
 
 
@@ -249,23 +190,13 @@ Please contact futianfan@gmail.com or gaowh19@gmail.com for help or submit an is
 ## Cite Us
 If you found this package useful, please cite [our paper](https://openreview.net/forum?id=w_drCosT76&referrer=%5BAuthor%20Console%5D(%2Fgroup%3Fid%3DICLR.cc%2F2022%2FConference%2FAuthors%23your-submissions)):
 ```
-@article{huang2020deeppurpose,
+@article{fu2020differentiable,
   title={Differentiable Scaffolding Tree for Molecule Optimization},
-  author={Tianfan Fu, Wenhao Gao, Cao Xiao, Jacob Yasonik, Connor W. Coley, Jimeng Sun},
+  author={Tianfan Fu*, Wenhao Gao*, Cao Xiao, Jacob Yasonik, Connor W. Coley, Jimeng Sun},
   journal={International Conference on Learning Representation (ICLR)},
   year={2022}
 }
 ```
-
-
-
-
-
-
-
-
-
-
 
 
 
