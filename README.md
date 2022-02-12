@@ -7,7 +7,17 @@ This repository hosts [DST (Differentiable Scaffolding Tree for Molecule Optimiz
 
 - Installation 
 - Data and Setup
-- Learning and Inference 
+  - raw data 
+  - oracle
+  - optimization task 
+  - labelling
+  - generate vocabulary 
+  - data cleaning  
+  - limit oracle setting 
+- Learning and Inference
+  - train graph neural network (GNN)
+  - de novo molecule design 
+  - evaluate  
 - Contact 
 
 
@@ -167,7 +177,7 @@ python src/evaluate.py $prop
 
 For example, 
 ```bash 
-python src/evaluate.py jnkgsk 5000 
+python src/evaluate.py jnkgsk 
 ```
 
 <!-- ## Example  -->
