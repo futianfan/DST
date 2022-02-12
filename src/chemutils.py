@@ -85,7 +85,7 @@ def jnk_gsk_fusion(jnk_score, gsk_score):
 
 
 def load_vocabulary():
-	datafile = "data/selected_vocabulary.txt"
+	datafile = "data/vocabulary.txt"
 	with open(datafile, 'r') as fin:
 		lines = fin.readlines()
 	vocabulary = [line.split()[0] for line in lines]

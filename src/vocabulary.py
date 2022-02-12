@@ -1,12 +1,38 @@
-from chemutils import smiles2word
+# from chemutils import smiles2word
 
 import os
 from collections import defaultdict 
 from tqdm import tqdm 
+from rdkit import Chem, DataStructs
 
-all_vocabulary_file = "data/all_vocabulary.txt"
-rawdata_file = "raw_data/zinc.tab"
-select_vocabulary_file = "data/selected_vocabulary.txt"
+
+def smiles2mol(smiles):
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None: 
+        return None
+    Chem.Kekulize(mol)
+    return mol 
+
+## input: smiles, output: word lst;  
+def smiles2word(smiles):
+    mol = smiles2mol(smiles)
+    if mol is None:
+        return None 
+    word_lst = []
+
+    cliques = [list(x) for x in Chem.GetSymmSSSR(mol)]
+    cliques_smiles = []
+    for clique in cliques:
+        clique_smiles = Chem.MolFragmentToSmiles(mol, clique, kekuleSmiles=True)
+        cliques_smiles.append(clique_smiles)
+    atom_not_in_rings_list = [atom.GetSymbol() for atom in mol.GetAtoms() if not atom.IsInRing()]
+    return cliques_smiles + atom_not_in_rings_list 
+
+
+
+all_vocabulary_file = "data/substructure.txt"
+rawdata_file = "data/zinc.tab"
+select_vocabulary_file = "data/vocabulary.txt"
 
 if not os.path.exists(all_vocabulary_file):
 	with open(rawdata_file) as fin:
