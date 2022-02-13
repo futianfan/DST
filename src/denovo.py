@@ -14,7 +14,7 @@ from chemutils import *
 from inference_utils import * 
 
 
-oracle_name = sys.argv[1]
+oracle_name = sys.argv[1] # 'jnkgsk', 'qedsajnkgsk', 'qed', 'jnk', 'gsk' 
 oracle_num = int(sys.argv[2])
 
 start_smiles_lst = ['C1(N)=NC=CC=N1']
@@ -24,12 +24,19 @@ sa = Oracle('sa')
 jnk = Oracle('JNK3')
 gsk = Oracle('GSK3B')
 logp = Oracle('logp')
+mu = 2.230044
+sigma = 0.6526308
+def normalize_sa(smiles):
+	sa_score = sa(smiles)
+	mod_score = np.maximum(sa_score, mu)
+	return np.exp(-0.5 * np.power((mod_score - mu) / sigma, 2.)) 
+
 if oracle_name == 'jnkgsk':
 	def oracle(smiles):
 		return np.mean((jnk(smiles), gsk(smiles)))
 elif oracle_name == 'qedsajnkgsk':
 	def oracle(smiles):
-		return np.mean((qed(smiles), sa(smiles), jnk(smiles), gsk(smiles))) 
+		return np.mean((qed(smiles), normalize_sa(smiles), jnk(smiles), gsk(smiles))) 
 elif oracle_name == 'qed':
 	def oracle(smiles):
 		return qed(smiles) 
@@ -54,13 +61,18 @@ gnn.switch_device(device)
 
 def optimization(start_smiles_lst, gnn, oracle, oracle_num, oracle_name, generations, population_size, lamb, topk, epsilon, result_pkl):
 	smiles2score = dict() ### oracle_num
+	def oracle_new(smiles):
+		if smiles not in smiles2score:
+			value = oracle(smiles) 
+			smiles2score[smiles] = value 
+		return smiles2score[smiles] 
 	trace_dict = dict() 
 	existing_set = set(start_smiles_lst)  
 	current_set = set(start_smiles_lst)
-	average_f = np.mean([oracle(smiles) for smiles in current_set])
+	average_f = np.mean([oracle_new(smiles) for smiles in current_set])
 	f_lst = [(average_f, 0.0)]
 	idx_2_smiles2f = {}
-	smiles2f_new = {smiles:oracle(smiles) for smiles in start_smiles_lst} 
+	smiles2f_new = {smiles:oracle_new(smiles) for smiles in start_smiles_lst} 
 	idx_2_smiles2f[-1] = smiles2f_new, current_set 
 	for i_gen in tqdm(range(generations)):
 		next_set = set()
@@ -75,8 +87,8 @@ def optimization(start_smiles_lst, gnn, oracle, oracle_num, oracle_name, generat
 					trace_dict[smi] = smiles 
 			next_set = next_set.union(smiles_set)
 		# next_set = next_set.difference(existing_set)   ### if allow repeat molecule  
-		smiles_score_lst = oracle_screening(next_set, oracle)  ###  sorted smiles_score_lst 
-		print(smiles_score_lst[:5])
+		smiles_score_lst = oracle_screening(next_set, oracle_new)  ###  sorted smiles_score_lst 
+		print(smiles_score_lst[:5], "Oracle num", len(smiles2score))
 
 		# current_set = [i[0] for i in smiles_score_lst[:population_size]]  # Option I: top-k 
 		current_set,_,_ = dpp(smiles_score_lst = smiles_score_lst, num_return = population_size, lamb = lamb) 	# Option II: DPP
@@ -95,13 +107,14 @@ def optimization(start_smiles_lst, gnn, oracle, oracle_num, oracle_name, generat
 		str_f_lst = [str(i[0])[:5]+'\t'+str(i[1])[:5] for i in f_lst]
 		with open("result/" + oracle_name + "_f_t.txt", 'w') as fout:
 			fout.write('\n'.join(str_f_lst))
-
+		if len(smiles2score) > oracle_num: 
+			break 
 
 
 
 if __name__ == "__main__":
-	generations = 200
-	population_size = 10
+	generations = 50
+	population_size = 20
 	result_pkl = "result/" + oracle_name + ".pkl"
 	optimization(start_smiles_lst, gnn, oracle, oracle_num, oracle_name,
 						generations = generations, 
