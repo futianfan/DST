@@ -10,10 +10,9 @@ This repository hosts [DST (Differentiable Scaffolding Tree for Molecule Optimiz
   - raw data 
   - oracle
   - optimization task 
-  - labelling
   - generate vocabulary 
   - data cleaning  
-  - limit oracle setting 
+  - labelling
 - Learning and Inference
   - train graph neural network (GNN)
   - de novo molecule design 
@@ -25,36 +24,35 @@ This repository hosts [DST (Differentiable Scaffolding Tree for Molecule Optimiz
 ## 1. Installation 
 
 To install locally, we recommend to install from `pip` and `conda`. Please see `conda.yml` for the package dependency. 
- 
 ```bash
 conda create -n dst python=3.7 
+conda activate dst
 pip install torch 
 pip install PyTDC 
 conda install -c rdkit rdkit 
 ```
 
 
-The following command activate conda environment. 
+Activate conda environment. 
 ```bash
 conda activate dst
-conda activate differentiable_molecular_graph
 ```
 
 
-
 ## 2. Data and Setup
+In our setup, we restrict the number of oracle calls. In realistic discovery settings, the oracle acquisition cost is usually not negligible. 
 
 
 ### Raw Data 
-
-We use [`ZINC`](https://tdcommons.ai/generation_tasks/molgen/) database, which contains around 250K drug-like molecules. 
-Due to space limitation, we upload a subset of ZINC in `raw_data/zinc.tab_head50`, which contains xxx molecules, each row is a SMILES. 
-
-
+We use [`ZINC`](https://tdcommons.ai/generation_tasks/molgen/) database, which contains around 250K drug-like molecules and can be downloaded [`download ZINC`](https://tdcommons.ai/generation_tasks/molgen/). 
+```bash
+python src/download.py
+```
+- output
+  - `data/zinc.tab`: all the smiles in ZINC, around 250K. 
 
 ### Oracle
-
-Oracle is a property evaluator and is a function whose input is molecular structure, and output is the ground truth value of the property. 
+Oracle is a property evaluator and is a function whose input is molecular structure, and output is the property. 
 We consider following oracles: 
 * `JNK3`: biological activity to JNK3, ranging from 0 to 1.
 * `GSK3B` biological activity to GSK3B, ranging from 0 to 1. 
@@ -64,61 +62,45 @@ We consider following oracles:
 
 For all the property scores above, higher is more desirable. 
 
-
 ### Optimization Task 
-
 There are two kinds of optimization tasks: single-objective and multi-objective optimization. 
 Multi-objective optimization contains `jnkgsk` (JNK3 + GSK3B), `qedsajnkgsk` (QED + SA + JNK3 + GSK3B). 
 
 
-### Labelling
-
-We use oracle to evaluate molecule's properties to obtain the labels for training graph neural network. 
-```bash  
-python src/data_zinc.py 
-```
-- input
-  - `raw_data/zinc.tab`: all the smiles in ZINC, around 250K. 
-- output
-  - `data/zinc_*.txt`: `*` can be QED, LogP, JNK3, GSK3B, etcs. 
-
-
-
 ### Generate Vocabulary 
-In this project, the basic unit is `substructure`, which can be atoms and single rings. 
+In this project, the basic unit is `substructure`, which can be atoms or single rings. 
 The vocabulary is the set of frequent `substructures`. 
 ```bash 
-python src/data_generate_vocabulary.py
+python src/vocabulary.py
 ```
 - input
-  - `raw_data/zinc.tab`: all the smiles in ZINC, around 250K. 
+  - `data/zinc.tab`: all the smiles in ZINC, around 250K. 
 - output
-  - `data/all_vocabulary.txt`: including all the substructures in ZINC.   
-  - `data/selected_vocabulary.txt`: vocabulary, frequent substructures. 
+  - `data/substructure.txt`: including all the substructures in ZINC. 
+  - `data/vocabulary.txt`: vocabulary, frequent substructures. 
 
-### 2.6 data cleaning  
-
+### data cleaning  
 We remove the molecules that contains substructure that is not in vocabulary. 
 
 ```bash 
-python src/data_cleaning.py 
+python src/clean.py 
 ```
 
 - input 
-  - `data/selected_vocabulary.txt`: vocabulary 
-  - `raw_data/zinc.tab`: all the smiles in ZINC
-  - `data/zinc_QED.txt`:  
+  - `data/vocabulary.txt`: vocabulary 
+  - `data/zinc.tab`: all the smiles in ZINC
 - output
-  - `data/zinc_QED_clean.txt`
+  - `data/zinc_clean.txt`
 
-
-### 2.7 limit oracle setting 
-
+### Labelling
+We use oracle to evaluate molecule's properties to obtain the labels for training graph neural network. 
+```bash
+python src/labelling.py
 ```
-head -10000 data/zinc_QED_clean.txt > data/zinc_QED_clean_10K.txt
-```
-
-
+- input
+  - `data/zinc_clean.txt`: all the smiles in ZINC, around 250K. 
+- output
+  - `data/zinc_label.txt`: including 6 columns, `smiles`, `qed`, `sa`, `jnk`, `gsk`, `logp`. We only contains subset of zinc (10K). 
 
 
 
@@ -126,7 +108,7 @@ head -10000 data/zinc_QED_clean.txt > data/zinc_QED_clean_10K.txt
 
 In our setup, we restrict the number of oracle calls in both training GNN and de novo design. 
 
-### 3.1 train graph neural network (GNN)
+### train graph neural network (GNN)
 
 It corresponds to Section 3.2 in the paper. 
 ```bash 
@@ -135,18 +117,17 @@ python src/train.py $prop $train_oracle
 - `prop` represent the property to optimize, including `qed`, `logp`, `jnk`, `gsk`, `jnkgsk`, `qedsajnkgsk`.  
 - `train_oracle` is number of oracle calls in training GNN. 
 - input 
-  - `data/zinc_QED_clean.txt`: **training data** includes `(SMILES,y)` pairs, where `SMILES` is the molecule, `y` is the label. `y = GNN(SMILES)`
+  - `data/zinc_label.txt`: **training data** includes `(SMILES,y)` pairs, where `SMILES` is the molecule, `y` is the label. `y = GNN(SMILES)`
 - output 
   - `save_model/model_epoch_*.ckpt`: saved GNN model. 
 - log
   - `"loss/{$prop}.pkl"` save the valid loss. 
-
 For example, 
 ```bash 
 python src/train.py jnkgsk 5000 
 ```
 
-### 3.2 de novo molecule design 
+### de novo molecule design 
 
 It corresponds to Section 3.3 and 3.4 in the paper.  
 
@@ -165,7 +146,7 @@ For example,
 python src/denovo.py jnkgsk 5000 
 ```
 
-### 3.3 evaluate 
+### evaluate 
 
 ```bash
 python src/evaluate.py $prop  

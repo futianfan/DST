@@ -1,3 +1,4 @@
+import sys
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -13,23 +14,21 @@ from chemutils import smiles2graph, vocabulary
 from utils import Molecule_Dataset 
 
 
-# ['JNK3', 'GSK3B', 'DRD2']
-prop = 'jnkgsk'
-
-
+oracle = sys.argv[1]
+oracle_num = int(sys.argv[2])
+oracle2labelidx = {'jnkgsk': [3,4], 'qedsajnkgsk':[1,2,3,4], 'qed':[1], 'jnk':[3], 'gsk':[4]}
+labelidx = oracle2labelidx[oracle]
 device = 'cpu'
-
-## 2.2 data 
-data_file = "data/" + prop + "_10k.txt"
+data_file = "data/zinc_label.txt"
 with open(data_file, 'r') as fin:
 	lines = fin.readlines() 
-lines = [(line.split()[0], float(line.split()[1])) for line in lines]
+
 shuffle(lines)
+lines = lines[:oracle_num]
+lines = [(line.split()[0], np.mean([float(line.split()[i]) for i in labelidx])) for line in lines]
 N = int(len(lines) * 0.9)
 train_data = lines[:N]
 valid_data = lines[N:]
-
-
 
 
 training_set = Molecule_Dataset(train_data)
@@ -45,7 +44,6 @@ train_generator = torch.utils.data.DataLoader(training_set, collate_fn = collate
 valid_generator = torch.utils.data.DataLoader(valid_set, collate_fn = collate_fn, **params)
 print('data loader is built!')
 
-
 gnn = GCN(nfeat = 50, nhid = 100, n_out = 1, num_layer = 3).to(device)
 print('GNN is built!')
 
@@ -54,7 +52,7 @@ cost_lst = []
 valid_loss_lst = []
 epoch = 5 
 every_k_iters = 5000
-save_folder = "save_model/" + prop + "_epoch_" 
+save_folder = "save_model/" + oracle + "_epoch_" 
 for ep in tqdm(range(epoch)):
 	for i, (smiles, score) in tqdm(enumerate(train_generator)):
 		### 1. training
@@ -89,12 +87,6 @@ for ep in tqdm(range(epoch)):
 			file_name = save_folder + str(ep) + "_iter_" + str(i) + "_validloss_" + str(valid_loss)[:7] + ".ckpt"
 			torch.save(gnn, file_name)
 			gnn.train()
-
-
-
-
-
-
 
 
 
