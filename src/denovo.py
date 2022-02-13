@@ -1,85 +1,46 @@
-'''
-start from 'C'
-
-
-'''
-
-### 1. import
-import os
+import os, pickle, sys, torch, random
 import numpy as np 
 from time import time
 from tqdm import tqdm 
 from matplotlib import pyplot as plt
-import pickle 
 from random import shuffle 
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from tdc import Oracle
 torch.manual_seed(1)
 np.random.seed(2)
-import random 
 random.seed(1)
 from chemutils import * 
-'''
-chemutils 
-	smiles2differentiable_graph
-	differentiable_graph2smiles
-	qed_logp_jnk_gsk_fusion
-'''
-from tdc import Evaluator
+from inference_utils import * 
 
 
+oracle_name = sys.argv[1]
+oracle_num = int(sys.argv[2])
+oracle2labelidx = {'jnkgsk': [3,4], 'qedsajnkgsk':[1,2,3,4], 'qed':[1], 'jnk':[3], 'gsk':[4]}
+labelidx = oracle2labelidx[oracle_name]
 
-
-## 2. data and oracle
 start_smiles_lst = ['C1(N)=NC=CC=N1']
 ## 'C1=CC=CC=C1NC2=NC=CC=N2'
-jnk = Oracle(name = 'JNK3')
-gsk = Oracle(name = 'GSK3B')
+qed = Oracle('qed')
+sa = Oracle('sa')
+jnk = Oracle('JNK3')
+gsk = Oracle('GSK3B')
+logp = Oracle('logp')
 def oracle(smiles):
 	scores = jnk(smiles), gsk(smiles)
 	return np.mean(scores)
 
 
-
-## 3. load model 
+## load model 
 # device = 'cuda' if torch.cuda.is_available() else 'cpu'
 device = 'cpu' ## cpu is better 
-prop = 'jnkgsk'
 model_ckpt = "save_model0/qed_logp_jnk_gsk_epoch_4_iter_14000_validloss_9715.ckpt"
 gnn = torch.load(model_ckpt)
 gnn.switch_device(device)
 
 
-
-## 4. inference function 
-from inference_utils import * 
-
-'''
-def optimize_single_molecule_one_iterate(smiles, gnn):
-	...
-	return smiles_set
-
-
-def gnn_screening(smiles_set, gnn):
-	... 
-	return smiles_lst
-
-def oracle_screening(smiles_set, oracle):
-	... 
-	return smiles_score_lst 
-
-
-def dpp(smiles_score_lst, num_return):
-
-	return smiles_lst 
-
-'''
-
-
-
-def distribution_learning(start_smiles_lst, gnn, oracle, generations, population_size, lamb, topk, epsilon, result_pkl):
+def optimization(start_smiles_lst, gnn, oracle, oracle_num, generations, population_size, lamb, topk, epsilon, result_pkl):
+	smiles2score = dict() 
 	trace_dict = dict() 
 	existing_set = set(start_smiles_lst)  
 	current_set = set(start_smiles_lst)
@@ -119,26 +80,23 @@ def distribution_learning(start_smiles_lst, gnn, oracle, generations, population
 		std_f = np.std(score_lst)
 		f_lst.append((average_f, std_f))
 		str_f_lst = [str(i[0])[:5]+'\t'+str(i[1])[:5] for i in f_lst]
-		with open("result/denovo_" + prop + "_f_t.txt", 'w') as fout:
+		with open("result/" + oracle_name + "_f_t.txt", 'w') as fout:
 			fout.write('\n'.join(str_f_lst))
 
 
 
 
-
-## 5. run 
 if __name__ == "__main__":
 	generations = 200
 	population_size = 10
-	# result_file = "result/denovo_from_" + start_smiles_lst[0] + "_generation_" + str(generations) + "_population_" + str(population_size) + ".pkl"
-	result_pkl = "result/denovo_" + prop + ".pkl"
-	distribution_learning(start_smiles_lst, gnn, oracle, 
-																	generations = generations, 
-																	population_size = population_size, 
-																	lamb=2, 
-																	topk = 5, 
-																	epsilon = 0.7, 
-																	result_pkl = result_pkl) 
+	result_pkl = "result/" + oracle_name + ".pkl"
+	optimization(start_smiles_lst, gnn, oracle, oracle_num, 
+						generations = generations, 
+						population_size = population_size, 
+						lamb=2, 
+						topk = 5, 
+						epsilon = 0.7, 
+						result_pkl = result_pkl) 
 
 
 
