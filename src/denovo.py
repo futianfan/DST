@@ -16,8 +16,6 @@ from inference_utils import *
 
 oracle_name = sys.argv[1]
 oracle_num = int(sys.argv[2])
-oracle2labelidx = {'jnkgsk': [3,4], 'qedsajnkgsk':[1,2,3,4], 'qed':[1], 'jnk':[3], 'gsk':[4]}
-labelidx = oracle2labelidx[oracle_name]
 
 start_smiles_lst = ['C1(N)=NC=CC=N1']
 ## 'C1=CC=CC=C1NC2=NC=CC=N2'
@@ -26,21 +24,36 @@ sa = Oracle('sa')
 jnk = Oracle('JNK3')
 gsk = Oracle('GSK3B')
 logp = Oracle('logp')
-def oracle(smiles):
-	scores = jnk(smiles), gsk(smiles)
-	return np.mean(scores)
+if oracle_name == 'jnkgsk':
+	def oracle(smiles):
+		return np.mean((jnk(smiles), gsk(smiles)))
+elif oracle_name == 'qedsajnkgsk':
+	def oracle(smiles):
+		return np.mean((qed(smiles), sa(smiles), jnk(smiles), gsk(smiles))) 
+elif oracle_name == 'qed':
+	def oracle(smiles):
+		return qed(smiles) 
+elif oracle_name == 'jnk':
+	def oracle(smiles):
+		return jnk(smiles)
+elif oracle_name == 'gsk':
+	def oracle(smiles):
+		return gsk(smiles) 
+elif oracle_name == 'logp':
+	def oracle(smiles):
+		return logp(smiles)
 
 
 ## load model 
 # device = 'cuda' if torch.cuda.is_available() else 'cpu'
 device = 'cpu' ## cpu is better 
-model_ckpt = "save_model0/qed_logp_jnk_gsk_epoch_4_iter_14000_validloss_9715.ckpt"
+model_ckpt = "save_model/jnkgsk_epoch_3_iter_0_validloss_0.09575.ckpt"
 gnn = torch.load(model_ckpt)
 gnn.switch_device(device)
 
 
-def optimization(start_smiles_lst, gnn, oracle, oracle_num, generations, population_size, lamb, topk, epsilon, result_pkl):
-	smiles2score = dict() 
+def optimization(start_smiles_lst, gnn, oracle, oracle_num, oracle_name, generations, population_size, lamb, topk, epsilon, result_pkl):
+	smiles2score = dict() ### oracle_num
 	trace_dict = dict() 
 	existing_set = set(start_smiles_lst)  
 	current_set = set(start_smiles_lst)
@@ -63,7 +76,7 @@ def optimization(start_smiles_lst, gnn, oracle, oracle_num, generations, populat
 			next_set = next_set.union(smiles_set)
 		# next_set = next_set.difference(existing_set)   ### if allow repeat molecule  
 		smiles_score_lst = oracle_screening(next_set, oracle)  ###  sorted smiles_score_lst 
-		print(smiles_score_lst[:7])
+		print(smiles_score_lst[:5])
 
 		# current_set = [i[0] for i in smiles_score_lst[:population_size]]  # Option I: top-k 
 		current_set,_,_ = dpp(smiles_score_lst = smiles_score_lst, num_return = population_size, lamb = lamb) 	# Option II: DPP
@@ -90,7 +103,7 @@ if __name__ == "__main__":
 	generations = 200
 	population_size = 10
 	result_pkl = "result/" + oracle_name + ".pkl"
-	optimization(start_smiles_lst, gnn, oracle, oracle_num, 
+	optimization(start_smiles_lst, gnn, oracle, oracle_num, oracle_name,
 						generations = generations, 
 						population_size = population_size, 
 						lamb=2, 

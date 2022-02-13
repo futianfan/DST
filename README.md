@@ -38,6 +38,11 @@ Activate conda environment.
 conda activate dst
 ```
 
+make directory
+```bash
+mkdir -p saved_model result 
+```
+
 
 ## 2. Data and Setup
 In our setup, we restrict the number of oracle calls. In realistic discovery settings, the oracle acquisition cost is usually not negligible. 
