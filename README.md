@@ -40,7 +40,7 @@ conda activate dst
 
 make directory
 ```bash
-mkdir -p saved_model result 
+mkdir -p save_model result 
 ```
 
 
