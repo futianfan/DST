@@ -40,9 +40,12 @@ if not os.path.exists(all_vocabulary_file):
 		smiles_lst = [line.strip().strip('"') for line in lines]
 	word2cnt = defaultdict(int)
 	for smiles in tqdm(smiles_lst):
-		word_lst = smiles2word(smiles)
-		for word in word_lst:
-			word2cnt[word] += 1
+		try:
+			word_lst = smiles2word(smiles)
+			for word in word_lst:
+				word2cnt[word] += 1
+		except:
+			pass 
 	word_cnt_lst = [(word,cnt) for word,cnt in word2cnt.items()]
 	word_cnt_lst = sorted(word_cnt_lst, key=lambda x:x[1], reverse = True)
 
