@@ -168,7 +168,11 @@ python src/evaluate.py jnkgsk
 
 <!-- ## Example  -->
 
+### Extension to multi-objective optimization 
 
+```bash
+python src/multiobjective.py 
+```
 
 
 ## Contact 

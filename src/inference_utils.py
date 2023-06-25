@@ -99,6 +99,28 @@ def optimize_single_molecule_one_iterate(smiles, gnn):
 											 leaf_extend_idx_pair = leaf_extend_idx_pair, leaf_nonleaf_lst = leaf_nonleaf_lst)
 	return smiles_set
 
+
+def optimize_single_molecule_one_iterate_gnnlist(smiles, gnn_list):
+	if not is_valid(smiles):
+		return set()
+	# node_mask, node_indicator, adjacency_mask, adjacency_weight = smiles2differentiable_graph(smiles)
+	node_indicator_list = []
+	adjacency_weight_list = []
+	for gnn in gnn_list:
+		(is_nonleaf, is_leaf, is_extend), node_indicator, adjacency_mask, adjacency_weight, leaf_extend_idx_pair, leaf_nonleaf_lst = smiles2differentiable_graph_v2(smiles)
+		node_mask = is_nonleaf + is_leaf
+		node_indicator_np2, adjacency_weight_np2 = gnn.update_molecule(node_mask, node_indicator, adjacency_mask, adjacency_weight)
+		node_indicator_list.append(node_indicator_np2)
+		adjacency_weight_list.append(adjacency_weight_np2)
+	node_indicator_np2 = sum(node_indicator_list) / len(gnn_list)
+	adjacency_weight_np2 = sum(adjacency_weight_list) / len(gnn_list)
+	differentiable_graph = node_indicator_np2, adjacency_weight_np2
+
+	smiles_set = differentiable_graph2smiles_v0(origin_smiles = smiles, differentiable_graph = differentiable_graph, 
+											 leaf_extend_idx_pair = leaf_extend_idx_pair, leaf_nonleaf_lst = leaf_nonleaf_lst)
+	return smiles_set
+
+
 #### shrink learnable;   greedy,  
 def optimize_single_molecule_one_iterate_v2(smiles, gnn):
 	if not is_valid(smiles):
@@ -114,11 +136,36 @@ def optimize_single_molecule_one_iterate_v3(smiles, gnn, topk, epsilon):
 	if not is_valid(smiles):
 		return set()
 	(is_nonleaf, is_leaf, is_extend), node_indicator, adjacency_mask, adjacency_weight, leaf_extend_idx_pair, leaf_nonleaf_lst = smiles2differentiable_graph_v2(smiles)
-	differentiable_graph = gnn.update_molecule_v2((is_nonleaf, is_leaf, is_extend), node_indicator, adjacency_mask, adjacency_weight, leaf_extend_idx_pair, leaf_nonleaf_lst)
+	differentiable_graph = gnn.update_molecule_v2((is_nonleaf, is_leaf, is_extend), 
+												node_indicator, adjacency_mask, 
+												adjacency_weight, leaf_extend_idx_pair, leaf_nonleaf_lst)
 	smiles_set = differentiable_graph2smiles_sample_v2(origin_smiles = smiles, differentiable_graph = differentiable_graph, 
 											 leaf_extend_idx_pair = leaf_extend_idx_pair, leaf_nonleaf_lst = leaf_nonleaf_lst, 
 											 topk = topk, epsilon = epsilon)
 	return smiles_set
+
+def optimize_single_molecule_one_iterate_v3_gnnlist(smiles, gnn_list, topk, epsilon):
+	if not is_valid(smiles):
+		return set()
+	(is_nonleaf, is_leaf, is_extend), node_indicator, adjacency_mask, adjacency_weight, leaf_extend_idx_pair, leaf_nonleaf_lst = smiles2differentiable_graph_v2(smiles)
+
+	node_indicator_list = []
+	adjacency_weight_list = []
+	for gnn in gnn_list:
+		differentiable_graph = gnn.update_molecule_v2((is_nonleaf, is_leaf, is_extend), 
+													node_indicator, adjacency_mask, adjacency_weight, 
+													leaf_extend_idx_pair, leaf_nonleaf_lst)
+		node_indicator_list.append(node_indicator_np2)
+		adjacency_weight_list.append(adjacency_weight_np2)
+	node_indicator_np2 = sum(node_indicator_list) / len(gnn_list)
+	adjacency_weight_np2 = sum(adjacency_weight_list) / len(gnn_list)
+	differentiable_graph = node_indicator_np2, adjacency_weight_np2
+	smiles_set = differentiable_graph2smiles_sample_v2(origin_smiles = smiles, differentiable_graph = differentiable_graph, 
+											 leaf_extend_idx_pair = leaf_extend_idx_pair, leaf_nonleaf_lst = leaf_nonleaf_lst, 
+											 topk = topk, epsilon = epsilon)
+	return smiles_set
+
+
 
 ## ablation study 
 # def random_optimizing_single_moleccule_one_iteration(smiles, gnn, random_topology = True, random_substr = True):
