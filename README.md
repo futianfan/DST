@@ -34,7 +34,7 @@ mkdir -p save_model result
 ```
 
 <a name="data"></a>
-## 2. Data
+## 📊 2. Data
 In our setup, we restrict the number of oracle calls. In realistic discovery settings, the oracle acquisition cost is usually not negligible. 
 
 
