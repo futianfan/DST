@@ -1,5 +1,4 @@
-# ![image](https://github.com/futianfan/DST/assets/5087210/b54af3bf-2d11-4e98-bbe6-7b4e208751e9)
- DST: Differentiable Scaffolding Tree for Molecule Optimization 
+# DST: Differentiable Scaffolding Tree for Molecule Optimization 
 
 This repository hosts [DST (Differentiable Scaffolding Tree for Molecule Optimization)](https://openreview.net/forum?id=w_drCosT76&referrer=%5BAuthor%20Console%5D(%2Fgroup%3Fid%3DICLR.cc%2F2022%2FConference%2FAuthors%23your-submissions)) (Tianfan Fu*, Wenhao Gao*, Cao Xiao, Jacob Yasonik, Connor W. Coley, Jimeng Sun), which enables a gradient-based optimization on a chemical graph. 
 
