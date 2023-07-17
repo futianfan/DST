@@ -6,7 +6,7 @@ This repository hosts [DST (Differentiable Scaffolding Tree for Molecule Optimiz
 ## Table Of Contents
 
 - Installation
-- [Data](## 2. Data and Setup)
+- Data
   - raw data 
   - oracle
   - optimization task 
@@ -44,7 +44,7 @@ mkdir -p save_model result
 ```
 
 
-## 2. Data and Setup
+## 2. Data
 In our setup, we restrict the number of oracle calls. In realistic discovery settings, the oracle acquisition cost is usually not negligible. 
 
 
