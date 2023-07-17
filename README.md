@@ -99,7 +99,7 @@ python src/labelling.py
 
 
 <a name="run"></a>
-## 3. Run 
+## 🤖 3. Run 
 
 In our setup, we restrict the number of oracle calls in both training GNN and de novo design. 
 
