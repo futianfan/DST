@@ -5,7 +5,7 @@ This repository hosts [DST (Differentiable Scaffolding Tree for Molecule Optimiz
 
 ## Table Of Contents
 
-- Installation 
+- [Installation](## 🚀 Installation) 
 - Data and Setup
   - raw data 
   - oracle
@@ -21,7 +21,7 @@ This repository hosts [DST (Differentiable Scaffolding Tree for Molecule Optimiz
 
 
 
-## 🚀 Installation 
+## 🚀 Installation
 
 To install locally, we recommend to install from `pip` and `conda`. Please see `conda.yml` for the package dependency. 
 ```bash
