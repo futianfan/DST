@@ -5,22 +5,13 @@ This repository hosts [DST (Differentiable Scaffolding Tree for Molecule Optimiz
 
 ## Table Of Contents
 
-- Installation
-- Data
-  - raw data 
-  - oracle
-  - optimization task 
-  - generate vocabulary 
-  - data cleaning  
-  - labelling
-- Learning and Inference
-  - train graph neural network (GNN)
-  - de novo molecule design 
-  - evaluate  
-- Contact 
+- [Installation](#installation)
+- [Data](#data)
+- [Run](#run)
+- [Contact](#contact) 
 
 
-
+<a name="installation"></a>
 ## 🚀 Installation
 
 To install locally, we recommend to install from `pip` and `conda`. Please see `conda.yml` for the package dependency. 
@@ -43,8 +34,8 @@ make directory
 mkdir -p save_model result 
 ```
 
-
-## 2. Data
+<a name="data"></a>
+## Data
 In our setup, we restrict the number of oracle calls. In realistic discovery settings, the oracle acquisition cost is usually not negligible. 
 
 
@@ -108,8 +99,8 @@ python src/labelling.py
   - `data/zinc_label.txt`: including 6 columns, `smiles`, `qed`, `sa`, `jnk`, `gsk`, `logp`. We only contains subset of zinc (10K). 
 
 
-
-## 3. Learning and Inference 
+<a name="run"></a>
+## 3. Run 
 
 In our setup, we restrict the number of oracle calls in both training GNN and de novo design. 
 
@@ -174,7 +165,7 @@ python src/evaluate.py jnkgsk
 python src/multiobjective.py 
 ```
 
-
+<a name="contact"></a>
 ## Contact 
 Please contact futianfan@gmail.com or gaowh19@gmail.com for help or submit an issue. 
 
