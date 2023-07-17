@@ -165,7 +165,7 @@ python src/multiobjective.py
 ```
 
 <a name="contact"></a>
-## Contact 
+## 📞 Contact 
 Please contact futianfan@gmail.com or gaowh19@gmail.com for help or submit an issue. 
 
 
