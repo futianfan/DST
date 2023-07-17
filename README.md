@@ -21,7 +21,7 @@ This repository hosts [DST (Differentiable Scaffolding Tree for Molecule Optimiz
 
 
 
-## 1. Installation 
+## 🚀 Installation 
 
 To install locally, we recommend to install from `pip` and `conda`. Please see `conda.yml` for the package dependency. 
 ```bash
