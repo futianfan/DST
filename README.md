@@ -5,14 +5,13 @@ This repository hosts [DST (Differentiable Scaffolding Tree for Molecule Optimiz
 
 ## Table Of Contents
 
-- [Installation](#installation)
-- [Data](#data)
-- [Run](#run)
-- [Contact](#contact) 
+- [1. Installation](#installation)
+- [2. Data](#data)
+- [3. Run](#run)
 
 
 <a name="installation"></a>
-## 🚀 Installation
+## 🚀 1. Installation
 
 To install locally, we recommend to install from `pip` and `conda`. Please see `conda.yml` for the package dependency. 
 ```bash
@@ -35,7 +34,7 @@ mkdir -p save_model result
 ```
 
 <a name="data"></a>
-## Data
+## 2. Data
 In our setup, we restrict the number of oracle calls. In realistic discovery settings, the oracle acquisition cost is usually not negligible. 
 
 
