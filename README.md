@@ -5,7 +5,7 @@ This repository hosts [DST (Differentiable Scaffolding Tree for Molecule Optimiz
 
 ## Table Of Contents
 
-- [Installation](## 🚀 Installation) 
+- Installation
 - Data and Setup
   - raw data 
   - oracle
